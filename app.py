@@ -104,7 +104,6 @@ def login():
     return render_template('/login.html')
 
 
-
 @app.route('/user-registration/', methods=["POST"])
 def user_registration():
     response = {}
@@ -125,7 +124,7 @@ def user_registration():
                            "first_name,"
                            "last_name,"
                            "username,"
-                           "password,address,phone_number,user_email) VALUES(?, ?, ?, ?, ?, ?, ?)", (first_name, last_name, username, password,address,phone_number,user_email))
+                           "password,address,phone_number,user_email) VALUES(?, ?, ?, ?, ?, ?, ?)", (first_name, last_name, username, password, address, phone_number, user_email))
             conn.commit()
             response["message"] = "success"
             response["status_code"] = 201
@@ -134,20 +133,21 @@ def user_registration():
 
 @app.route('/create-Point_of_Sale/', methods=["POST"])
 @jwt_required()
-def create_Point_of_Sale():
+def create_point_of_sale():
     response = {}
 
     if request.method == "POST":
-        title = request.form['title']
-        content = request.form['content']
+        id = request.form['id']
+        Product_name = request.form['Product_name']
+
         date_created = datetime.datetime.now()
 
         with sqlite3.connect('Point_of_Sale.db') as conn:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO post("
-                           "title,"
-                           "content,"
-                           "date_created) VALUES(?, ?, ?)", (title, content, date_created))
+                           "id,"
+                           "Product_name,"
+                           "date_created) VALUES(?, ?, ?)", (id, Product_name, date_created))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Point_of_Sale post added succesfully"
@@ -155,15 +155,20 @@ def create_Point_of_Sale():
 
 ### Creating products
 
+
 @app.route('/products/')
 def show_products():
-    products = [{'id':0,'Product_name':'Yocco speed point','Price':300,'Description':'The best speed point'},{'id':1,'Product_name':'Yocco card machine','Description':'Best card machin'}]
+    products = [{'id': 0, 'Product_name': 'deep curly 8inch', 'Price': 'R900', 'Description': 'The best speed point'},
+                {'id': 1, 'Product_name': 'brazzilian 8 inch', 'Price': 'R900', 'Description': 'Best card machin'},
+                {'id': 2, 'Product_name': 'Yocco speed point',  'Price': '300', 'Description': 'The best speed point'},
+                {'id': 3, 'Product_name': 'Yocco card machine', 'Price': 'R900', 'Description': 'Best card machin'},
+                {'id': 4, 'Product_name': 'Yocco speed point', 'Price': 'R2900', 'Description': 'The best speed point'},
+                {'id': 5, 'Product_name': 'Yocco card machine',  'Price': 'R900', 'Description': 'Best card machin'}]
     return jsonify(products)
 
 
-
 @app.route('/get-Point_of_Sales/', methods=["GET"])
-def get_Point_of_Sales():
+def get_point_of_sales():
     response = {}
     with sqlite3.connect("Point_of_Sale.db") as conn:
         cursor = conn.cursor()
@@ -174,7 +179,6 @@ def get_Point_of_Sales():
     response['status_code'] = 200
     response['data'] = posts
     return response
-
 
 
 @app.route("/delete-post/<int:post_id>")
@@ -188,7 +192,6 @@ def delete_post(post_id):
         response['status_code'] = 200
         response['message'] = "Point_of_Sale post deleted successfully."
     return response
-
 
 
 @app.route('/edit-post/<int:post_id>/', methods=["PUT"])
@@ -235,6 +238,7 @@ def get_post(post_id):
         response["data"] = cursor.fetchone()
 
     return jsonify(response)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
