@@ -30,7 +30,9 @@ def init_user_table():
                  "first_name TEXT NOT NULL,"
                  "last_name TEXT NOT NULL,"
                  "username TEXT NOT NULL,"
-                 "password TEXT NOT NULL, address TEXT NOT NULL, phone_number INT NOT NULL, user_email TEXT NOT NULL)")
+                 "password TEXT NOT NULL, address TEXT NOT NULL, "
+                 "phone_number INT NOT NULL,"
+                 " user_email TEXT NOT NULL)")
     print("user table created successfully")
     conn.close()
 
