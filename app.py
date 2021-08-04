@@ -1,6 +1,5 @@
 import hmac
 import sqlite3
-import datetime
 
 from flask import Flask, request, jsonify, redirect, render_template
 from flask_jwt import JWT, jwt_required, current_identity
@@ -39,16 +38,16 @@ def init_post_table():
     print("Login table created successfully.")
 
 
-def product_table():
+def init_product_table():
     with sqlite3.connect('Point_of_Sale.db') as conn:
-        conn.execute("CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        conn.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "product_name TEXT NOT NULL,"
                      "price TEXT NOT NULL,"
-                     "description TEXT NOT NULL, quantity TEXT NOT NULL)")
+                     "description TEXT NOT NULL)")
     print("Product table created successfully.")
 
 
-product_table()
+init_product_table()
 init_user_table()
 init_post_table()
 
@@ -99,8 +98,6 @@ def protected():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
-#username = request.form['username']
-#password = request.form['password']
     return render_template('/login.html')
 
 
@@ -131,39 +128,34 @@ def user_registration():
         return response
 
 
-@app.route('/create-Point_of_Sale/', methods=["POST"])
+@app.route('/create-products/', methods=["POST"])
 @jwt_required()
-def create_point_of_sale():
+def create_products():
     response = {}
 
     if request.method == "POST":
-        id = request.form['id']
-        Product_name = request.form['Product_name']
-
-        date_created = datetime.datetime.now()
+        product_name = request.form['product_name']
+        price = request.form['price']
+        description = request.form['description']
 
         with sqlite3.connect('Point_of_Sale.db') as conn:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO post("
-                           "id,"
-                           "Product_name,"
-                           "date_created) VALUES(?, ?, ?)", (id, Product_name, date_created))
+            cursor.execute("INSERT INTO product("
+                           "product_name,"
+                           "price,"
+                           "description) VALUES(?, ?, ?)", (product_name, price, description))
             conn.commit()
             response["status_code"] = 201
-            response['description'] = "Point_of_Sale post added succesfully"
+            response['description'] = "Point_of_Sale products added succesfully"
         return response
 
-### Creating products
+# Creating products
 
 
 @app.route('/products/')
 def show_products():
-    products = [{'id': 0, 'Product_name': 'deep curly 8inch', 'Price': 'R900', 'Description': 'The best speed point'},
-                {'id': 1, 'Product_name': 'brazzilian 8 inch', 'Price': 'R900', 'Description': 'Best card machin'},
-                {'id': 2, 'Product_name': 'Yocco speed point',  'Price': '300', 'Description': 'The best speed point'},
-                {'id': 3, 'Product_name': 'Yocco card machine', 'Price': 'R900', 'Description': 'Best card machin'},
-                {'id': 4, 'Product_name': 'Yocco speed point', 'Price': 'R2900', 'Description': 'The best speed point'},
-                {'id': 5, 'Product_name': 'Yocco card machine',  'Price': 'R900', 'Description': 'Best card machin'}]
+    products = [{'id': 0, 'product_name': 'deep curly 8inch', 'price': 'R900', 'description': 'The best speed point'},
+                {'id': 1, 'product_name': 'brazilian 8 inch', 'price': 'R900', 'description': 'Best card machin'}]
     return jsonify(products)
 
 
@@ -172,7 +164,7 @@ def get_point_of_sales():
     response = {}
     with sqlite3.connect("Point_of_Sale.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM post")
+        cursor.execute("SELECT * FROM product")
 
         posts = cursor.fetchall()
 
@@ -180,21 +172,24 @@ def get_point_of_sales():
     response['data'] = posts
     return response
 
+# Deleting products
 
-@app.route("/delete-post/<int:post_id>")
+
+@app.route("/delete-products/<int:post_id>")
 @jwt_required()
 def delete_post(post_id):
     response = {}
     with sqlite3.connect("Point_of_Sale.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM post WHERE id=" + str(post_id))
+        cursor.execute("DELETE FROM products WHERE id=" + str(post_id))
         conn.commit()
         response['status_code'] = 200
-        response['message'] = "Point_of_Sale post deleted successfully."
+        response['message'] = "Point_of_Sale product deleted successfully."
     return response
 
+# Updating products
 
-@app.route('/edit-post/<int:post_id>/', methods=["PUT"])
+@app.route('/update-products/<int:post_id>/', methods=["PUT"])
 @jwt_required()
 def edit_post(post_id):
     response = {}
@@ -204,23 +199,33 @@ def edit_post(post_id):
             incoming_data = dict(request.json)
             put_data = {}
 
-            if incoming_data.get("title") is not None:
-                put_data["title"] = incoming_data.get("title")
+            if incoming_data.get("product_name") is not None:
+                put_data["product_name"] = incoming_data.get("product_name")
                 with sqlite3.connect('Point_of_Sale.db') as conn:
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE post SET title =? WHERE id=?", (put_data["title"], post_id))
+                    cursor.execute("UPDATE products SET product_name =? WHERE id=?", (put_data["product_name"], post_id))
                     conn.commit()
                     response['message'] = "Update was successfully"
                     response['status_code'] = 200
-            if incoming_data.get("content") is not None:
-                put_data['content'] = incoming_data.get('content')
+            if incoming_data.get("price") is not None:
+                put_data['price'] = incoming_data.get('price')
+                with sqlite3.connect('Point_of_Sale.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE post SET price =? WHERE id=?", (put_data["price"], post_id))
+                    conn.commit()
+
+                    response["price"] = "price was updated successfully"
+                    response["status_code"] = 200
+
+            if incoming_data.get("description") is not None:
+                put_data['description'] = incoming_data.get('description')
 
                 with sqlite3.connect('Point_of_Sale.db') as conn:
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE post SET content =? WHERE id=?", (put_data["content"], post_id))
+                    cursor.execute("UPDATE post SET description =? WHERE id=?", (put_data["description"], post_id))
                     conn.commit()
 
-                    response["content"] = "Content updated successfully"
+                    response["description"] = "description was updated successfully"
                     response["status_code"] = 200
     return response
 
@@ -231,7 +236,7 @@ def get_post(post_id):
 
     with sqlite3.connect("Point_of_Sale.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM post WHERE id=" + str(post_id))
+        cursor.execute("SELECT * FROM products WHERE id=" + str(post_id))
 
         response["status_code"] = 200
         response["description"] = "Point_of_Sale post retrieved successfully"
