@@ -1,3 +1,7 @@
+# Thandokazi Nkohla
+# Class 2
+
+
 import hmac
 import sqlite3
 
@@ -15,6 +19,8 @@ class User(object):
         self.phone_number = phone_number
         self.address = address
 
+# Creating register table
+
 
 def init_user_table():
     conn = sqlite3.connect('Point_of_Sale.db')
@@ -28,6 +34,8 @@ def init_user_table():
     print("user table created successfully")
     conn.close()
 
+# Creating Login table
+
 
 def init_post_table():
     with sqlite3.connect('Point_of_Sale.db') as conn:
@@ -36,6 +44,8 @@ def init_post_table():
                      "password TEXT NOT NULL,"
                      "login_date TEXT NOT NULL)")
     print("Login table created successfully.")
+
+# Creating Products table
 
 
 def init_product_table():
@@ -181,7 +191,7 @@ def delete_post(post_id):
     response = {}
     with sqlite3.connect("Point_of_Sale.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM products WHERE id=" + str(post_id))
+        cursor.execute("DELETE FROM product WHERE id=" + str(post_id))
         conn.commit()
         response['status_code'] = 200
         response['message'] = "Point_of_Sale product deleted successfully."
@@ -189,8 +199,9 @@ def delete_post(post_id):
 
 # Updating products
 
+
 @app.route('/update-products/<int:post_id>/', methods=["PUT"])
-@jwt_required()
+#@jwt_required()
 def edit_post(post_id):
     response = {}
 
@@ -203,7 +214,7 @@ def edit_post(post_id):
                 put_data["product_name"] = incoming_data.get("product_name")
                 with sqlite3.connect('Point_of_Sale.db') as conn:
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE products SET product_name =? WHERE id=?", (put_data["product_name"], post_id))
+                    cursor.execute("UPDATE product SET product_name =? WHERE id=?", (put_data["product_name"], post_id))
                     conn.commit()
                     response['message'] = "Update was successfully"
                     response['status_code'] = 200
@@ -211,7 +222,7 @@ def edit_post(post_id):
                 put_data['price'] = incoming_data.get('price')
                 with sqlite3.connect('Point_of_Sale.db') as conn:
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE post SET price =? WHERE id=?", (put_data["price"], post_id))
+                    cursor.execute("UPDATE product SET price =? WHERE id=?", (put_data["price"], post_id))
                     conn.commit()
 
                     response["price"] = "price was updated successfully"
@@ -222,7 +233,7 @@ def edit_post(post_id):
 
                 with sqlite3.connect('Point_of_Sale.db') as conn:
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE post SET description =? WHERE id=?", (put_data["description"], post_id))
+                    cursor.execute("UPDATE product SET description =? WHERE id=?", (put_data["description"], post_id))
                     conn.commit()
 
                     response["description"] = "description was updated successfully"
