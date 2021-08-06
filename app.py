@@ -8,6 +8,7 @@ import sqlite3
 from flask import Flask, request, jsonify, render_template
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
+from flask_mail import Mail, Message
 
 
 class User(object):
@@ -101,6 +102,17 @@ app.config['SECRET_KEY'] = 'super-secret'
 
 jwt = JWT(app, authenticate, identity)
 
+app = Flask(__name__)
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'siyanjomeni@gmail.com'
+app.config['MAIL_PASSWORD'] = '0845168883'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
+
+
 
 @app.route('/protected')
 @jwt_required()
@@ -137,6 +149,10 @@ def user_registration():
             conn.commit()
             response["message"] = "success"
             response["status_code"] = 201
+            msg = Message('Hello Message', sender='siyanjomeni@gmail.com', recipients=['ayamzazi@@gmail.com'])
+            msg.body = "My email using Flask"
+            mail.send(msg)
+
         return response
 
 
