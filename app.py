@@ -200,6 +200,18 @@ def get_point_of_sales():
     response['data'] = posts
     return response
 
+@app.route('/get-users/', methods=["GET"])
+def get_users():
+    response = {}
+    with sqlite3.connect("Point_of_Sale.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM user")
+
+        posts = cursor.fetchall()
+
+    response['status_code'] = 200
+    response['data'] = posts
+    return response
 # Deleting products
 
 
