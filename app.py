@@ -5,7 +5,7 @@
 import hmac
 import sqlite3
 
-from flask import Flask, request, jsonify, redirect, render_template
+from flask import Flask, request, jsonify, render_template
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
 
@@ -158,7 +158,7 @@ def create_products():
                            "description) VALUES(?, ?, ?)", (product_name, price, description))
             conn.commit()
             response["status_code"] = 201
-            response['description'] = "Point_of_Sale products added succesfully"
+            response['description'] = "Point_of_Sale products added successfully"
         return response
 
 # Creating products
@@ -167,7 +167,7 @@ def create_products():
 @app.route('/products/')
 def show_products():
     products = [{'id': 0, 'product_name': 'deep curly 8inch', 'price': 'R900', 'description': 'The best speed point'},
-                {'id': 1, 'product_name': 'brazilian 8 inch', 'price': 'R900', 'description': 'Best card machin'}]
+                {'id': 1, 'product_name': 'brazilian 8 inch', 'price': 'R900', 'description': 'Best card machine'}]
     return jsonify(products)
 
 
@@ -203,7 +203,7 @@ def delete_post(post_id):
 
 
 @app.route('/update-products/<int:post_id>/', methods=["PUT"])
-#@jwt_required()
+@jwt_required()
 def edit_post(post_id):
     response = {}
 
