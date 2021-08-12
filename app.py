@@ -47,8 +47,7 @@ def init_post_table():
         conn.execute("CREATE TABLE IF NOT EXISTS login (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "user_email TEXT NOT NULL,"
                      "password TEXT NOT NULL,"
-                     "login_date TEXT NOT NULL, "
-                     "images TEXT NOT NULL)")
+                     "login_date TEXT NOT NULL)")
     print("Login table created successfully.")
 
 
@@ -60,7 +59,8 @@ def init_product_table():
         conn.execute("CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "product_name TEXT NOT NULL,"
                      "price TEXT NOT NULL,"
-                     "description TEXT NOT NULL)")
+                     "description TEXT NOT NULL,"
+                     "images TEXT NOT NULL)")
     print("Product table created successfully.")
 
 
@@ -159,7 +159,7 @@ def user_registration():
 
 
 @app.route('/create-products/', methods=["POST"])
-@jwt_required()
+#@jwt_required()
 def create_products():
     response = {}
 
