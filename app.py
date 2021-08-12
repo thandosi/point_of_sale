@@ -20,6 +20,7 @@ class User(object):
         self.phone_number = phone_number
         self.address = address
 
+
 # Creating register table
 
 
@@ -37,6 +38,7 @@ def init_user_table():
     print("user table created successfully")
     conn.close()
 
+
 # Creating Login table
 
 
@@ -45,8 +47,10 @@ def init_post_table():
         conn.execute("CREATE TABLE IF NOT EXISTS login (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                      "user_email TEXT NOT NULL,"
                      "password TEXT NOT NULL,"
-                     "login_date TEXT NOT NULL)")
+                     "login_date TEXT NOT NULL, "
+                     "images TEXT NOT NULL)")
     print("Login table created successfully.")
+
 
 # Creating Products table
 
@@ -103,15 +107,13 @@ app.config['SECRET_KEY'] = 'super-secret'
 jwt = JWT(app, authenticate, identity)
 
 app = Flask(__name__)
-app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'siyanjomeni@gmail.com'
 app.config['MAIL_PASSWORD'] = '0845168883'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
-
-
 
 
 @app.route('/protected')
@@ -130,7 +132,6 @@ def user_registration():
     response = {}
 
     if request.method == "POST":
-
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         username = request.form['username']
@@ -145,11 +146,12 @@ def user_registration():
                            "first_name,"
                            "last_name,"
                            "username,"
-                           "password,address,phone_number,user_email) VALUES(?, ?, ?, ?, ?, ?, ?)", (first_name, last_name, username, password, address, phone_number, user_email))
+                           "password,address,phone_number,user_email) VALUES(?, ?, ?, ?, ?, ?, ?)",
+                           (first_name, last_name, username, password, address, phone_number, user_email))
             conn.commit()
             response["message"] = "success"
             response["status_code"] = 201
-            msg = Message('Hello Message', sender='siyanjomeni@gmail.com', recipients=['ayamzazi@@gmail.com'])
+            msg = Message('Hello Message', sender='siyanjomeni@gmail.com', recipients=['ayamzazi@gmail.com'])
             msg.body = "My email using Flask"
             mail.send(msg)
 
@@ -165,17 +167,19 @@ def create_products():
         product_name = request.form['product_name']
         price = request.form['price']
         description = request.form['description']
+        images = request.form['images']
 
         with sqlite3.connect('Point_of_Sale.db') as conn:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO product("
                            "product_name,"
                            "price,"
-                           "description) VALUES(?, ?, ?)", (product_name, price, description))
+                           "description, images) VALUES(?, ?, ?, ?)", (product_name, price, description, images))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Point_of_Sale products added successfully"
         return response
+
 
 # Creating products
 
@@ -192,26 +196,43 @@ def get_point_of_sales():
     response = {}
     with sqlite3.connect("Point_of_Sale.db") as conn:
         cursor = conn.cursor()
+        cursor.row_factory = sqlite3.Row
         cursor.execute("SELECT * FROM product")
 
         posts = cursor.fetchall()
 
+        accumulator = []
+
+        for i in posts:
+            accumulator.append({k: i[k] for k in i.keys()})
+
     response['status_code'] = 200
-    response['data'] = posts
-    return response
+    response['data'] = tuple(accumulator)
+    return jsonify(response)
+
+
+# Getting users
+
 
 @app.route('/get-users/', methods=["GET"])
 def get_users():
     response = {}
     with sqlite3.connect("Point_of_Sale.db") as conn:
         cursor = conn.cursor()
+        cursor.row_factory = sqlite3.Row
+
         cursor.execute("SELECT * FROM user")
 
         posts = cursor.fetchall()
+        accumulator = []
+
+        for i in posts:
+            accumulator.append({k: i[k] for k in i.keys()})
 
     response['status_code'] = 200
-    response['data'] = posts
-    return response
+    response['data'] = tuple(accumulator)
+    return jsonify(response)
+
 # Deleting products
 
 
@@ -226,6 +247,7 @@ def delete_post(post_id):
         response['status_code'] = 200
         response['message'] = "Point_of_Sale product deleted successfully."
     return response
+
 
 # Updating products
 
@@ -269,21 +291,6 @@ def edit_post(post_id):
                     response["description"] = "description was updated successfully"
                     response["status_code"] = 200
     return response
-
-
-@app.route('/get-post/<int:post_id>/', methods=["GET"])
-def get_post(post_id):
-    response = {}
-
-    with sqlite3.connect("Point_of_Sale.db") as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM products WHERE id=" + str(post_id))
-
-        response["status_code"] = 200
-        response["description"] = "Point_of_Sale post retrieved successfully"
-        response["data"] = cursor.fetchone()
-
-    return jsonify(response)
 
 
 if __name__ == '__main__':
