@@ -7,7 +7,7 @@ import sqlite3
 
 from flask import Flask, request, jsonify, render_template
 from flask_jwt import JWT, jwt_required, current_identity
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask_mail import Mail, Message
 
 
@@ -132,13 +132,13 @@ def user_registration():
     response = {}
 
     if request.method == "POST":
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        username = request.form['username']
-        password = request.form['password']
-        address = request.form['address']
-        phone_number = request.form['phone_number']
-        user_email = request.form['user_email']
+        first_name = request.json['first_name']
+        last_name = request.json['last_name']
+        username = request.json['username']
+        password = request.json['password']
+        address = request.json['address']
+        phone_number = request.json['phone_number']
+        user_email = request.json['user_email']
 
         with sqlite3.connect("Point_of_Sale.db") as conn:
             cursor = conn.cursor()
@@ -164,10 +164,10 @@ def create_products():
     response = {}
 
     if request.method == "POST":
-        product_name = request.form['product_name']
-        price = request.form['price']
-        description = request.form['description']
-        images = request.form['images']
+        product_name = request.json['product_name']
+        price = request.json['price']
+        description = request.json['description']
+        images = request.json['images']
 
         with sqlite3.connect('Point_of_Sale.db') as conn:
             cursor = conn.cursor()
@@ -185,6 +185,7 @@ def create_products():
 
 
 @app.route('/products/')
+@cross_origin()
 def show_products():
     products = [{'id': 0, 'product_name': 'deep curly 8inch', 'price': 'R900', 'description': 'The best speed point'},
                 {'id': 1, 'product_name': 'brazilian 8 inch', 'price': 'R900', 'description': 'Best card machine'}]
@@ -192,6 +193,7 @@ def show_products():
 
 
 @app.route('/get-Point_of_Sales/', methods=["GET"])
+@cross_origin()
 def get_point_of_sales():
     response = {}
     with sqlite3.connect("Point_of_Sale.db") as conn:
