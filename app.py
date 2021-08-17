@@ -132,13 +132,13 @@ def user_registration():
     response = {}
 
     if request.method == "POST":
-        first_name = request.json['first_name']
-        last_name = request.json['last_name']
-        username = request.json['username']
-        password = request.json['password']
-        address = request.json['address']
-        phone_number = request.json['phone_number']
-        user_email = request.json['user_email']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        username = request.form['username']
+        password = request.form['password']
+        address = request.form['address']
+        phone_number = request.form['phone_number']
+        user_email = request.form['user_email']
 
         with sqlite3.connect("Point_of_Sale.db") as conn:
             cursor = conn.cursor()
@@ -164,10 +164,10 @@ def create_products():
     response = {}
 
     if request.method == "POST":
-        product_name = request.json['product_name']
-        price = request.json['price']
-        description = request.json['description']
-        images = request.json['images']
+        product_name = request.form['product_name']
+        price = request.form['price']
+        description = request.form['description']
+        images = request.form['images']
 
         with sqlite3.connect('Point_of_Sale.db') as conn:
             cursor = conn.cursor()
@@ -261,7 +261,7 @@ def edit_post(post_id):
 
     if request.method == "PUT":
         with sqlite3.connect('Point_of_Sale.db') as conn:
-            incoming_data = dict(request.json)
+            incoming_data = dict(request.form)
             put_data = {}
 
             if incoming_data.get("product_name") is not None:
